@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Denzz Overload // System Breach Protocol v9.99</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas#matrix {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 10px 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #f0f;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            border-bottom: 3px solid #0f0;
+            padding: 15px 0;
+            text-shadow: 0 0 20px #f0f, 0 0 40px #f0f;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.6em, 6vw, 2.4em);
+            animation: glitch-title 3s infinite;
+        }
+
+        @keyframes glitch-title {
+            0%,100% { text-shadow: 0 0 20px #f0f; }
+            50% { text-shadow: -5px 0 #0ff, 5px 0 #f00; }
+        }
+
+        .terminal {
+            background: rgba(0,0,0,0.9);
+            border: 3px solid #0f0;
+            padding: 25px;
+            flex: 1;
+            overflow-y: auto;
+            box-shadow: 0 0 50px #0f0, inset 0 0 30px #000;
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+        }
+
+        .line {
+            line-height: 1.8;
+            margin-bottom: 12px;
+            opacity: 0;
+            animation: fadeIn 0.8s forwards, scanline 0.1s linear infinite;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes scanline { 0% { text-shadow: 0 0 10px #0f0; } 50% { text-shadow: 0 0 20px #0ff; } 100% { text-shadow: 0 0 10px #0f0; } }
+
+        .prompt { color: #ff0; }
+        .wa-logo { color: #25D366; text-shadow: 0 0 15px #25D366; font-weight: bold; }
+        .blink { animation: blinker 1s step-end infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        #target-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 18px 22px;
+            background: #000;
+            color: #0ff;
+            border: 3px solid #0f0;
+            border-radius: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            box-shadow: 0 0 30px #0f0;
+            transition: 0.4s;
+        }
+
+        #target-input:focus {
+            outline: none;
+            box-shadow: 0 0 50px #0ff;
+            transform: scale(1.05);
+        }
+
+        #start-btn {
+            padding: 18px 45px;
+            background: linear-gradient(45deg, #f0f, #0ff);
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.4em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 40px #f0f, 0 15px 40px rgba(0,0,0,0.8);
+            transition: 0.5s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #start-btn:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 0 0 80px #0ff;
+        }
+
+        #start-btn:disabled {
+            background: #333;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after {
+            content: 'OVERLOAD';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            animation: glitch-anim 2s infinite;
+        }
+        .glitch::before { color: #0ff; left: 3px; animation-delay: 0.2s; }
+        .glitch::after { color: #f00; left: -3px; animation-delay: 0.4s; }
+
+        @keyframes glitch-anim {
+            0%,100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+            20% { clip-path: polygon(0 20%, 100% 20%, 100% 80%, 0 80%); }
+            50% { clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%); }
+        }
+
+        .progress-container { margin: 40px 0; display: none; }
+        .progress-bar {
+            background: #111;
+            border: 3px solid #0f0;
+            height: 50px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 40px #0f0;
+        }
+        .progress-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f0f, #0ff, #0f0);
+            box-shadow: 0 0 40px #f0f;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        .progress-status {
+            text-align: center;
+            margin-top: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3em;
+            text-shadow: 0 0 20px #0ff;
+        }
+
+        .success { color: #0f0; text-shadow: 0 0 30px #0f0; font-weight: bold; font-size: 1.4em; animation: glow 2s infinite; }
+        @keyframes glow { 50% { text-shadow: 0 0 50px #0ff; } }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: linear-gradient(#0f0, #f0f);
+            border-radius: 10px;
+            box-shadow: 0 0 20px #0f0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+
+    <audio id="bgmusic" loop autoplay volume="0.4">
+        <source src="https://cdn.pixabay.com/download/audio/2023/03/23/audio_0b7d28f7e5.mp3?filename=cyberpunk-12187.mp3" type="audio/mpeg">
+        <!-- Fallback alternatif kalau link mati -->
+        <source src="https://cdn.pixabay.com/download/audio/2022/08/31/audio_2d9e5b3e2d.mp3?filename=hacker-12186.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <h1>[ Denzz Overload ] :: System Breach Protocol v9.99</h1>
+
+        <div class="terminal" id="terminal-output">
+            <div class="line"><span class="wa-logo">[SYSTEM]</span> Denzz Overload Engine Activated.</div>
+            <div class="line prompt">Enter target device ID (e.g., WhatsApp number):</div>
+            
+            <div class="input-group">
+                <input type="text" id="target-input" placeholder="628xxxxxxxxxx" autofocus>
+                <button id="start-btn"><span class="glitch">OVERLOAD</span></button>
+            </div>
+
+            <div id="log-area" style="margin-top: 30px; flex: 1;"></div>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-inner" id="progress-inner"></div>
+                </div>
+                <div class="progress-status" id="progress-status">Awaiting payload...</div>
+            </div>
+
+            <div id="final-status"></div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = `${fontSize}px monospace`;
+
+            drops.forEach((y, i) => {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(draw, 35);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Main Script
+        const targetInput = document.getElementById('target-input');
+        const startBtn = document.getElementById('start-btn');
+        const logArea = document.getElementById('log-area');
+        const progressContainer = document.getElementById('progress-container');
+        const progressInner = document.getElementById('progress-inner');
+        const progressStatus = document.getElementById('progress-status');
+        const finalStatus = document.getElementById('final-status');
+        const terminal = document.getElementById('terminal-output');
+
+        const fakeLogs = [
+            "Initializing overload sequence...",
+            "Scanning target device signature...",
+            "Exploiting zero-day buffer overflow...",
+            "Injecting recursive payload stream...",
+            "Overriding system resource limits...",
+            "Flooding kernel memory allocation...",
+            "<span class='status'>CRITICAL: Target CPU spiking to 100%!</span>",
+            "Disabling background processes...",
+            "Forcing infinite resource drain...",
+            "Target device overheating detected...",
+            "System stability compromised.",
+            "<span class='success'>OVERLOAD COMPLETE: Device rendered unusable!</span>",
+            "<span class='success'>Target phone akan restart berulang & lag parah sampai mati total.</span>",
+            "<span class='success'>Payload aktif permanen. Enjoy the destruction.</span>",
+        ];
+
+        let progress = 0;
+
+        function typeLine(text, delay = 1000) {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'line';
+            lineDiv.innerHTML = text;
+            logArea.appendChild(lineDiv);
+            terminal.scrollTop = terminal.scrollHeight;
+            return new Promise(resolve => setTimeout(resolve, delay + Math.random() * 800));
+        }
+
+        async function runLogs() {
+            for (const log of fakeLogs) await typeLine(log);
+        }
+
+        function runProgress() {
+            progressContainer.style.display = 'block';
+            const interval = setInterval(() => {
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progressInner.style.width = '100%';
+                    progressStatus.innerHTML = "<span class='success'>SYSTEM DESTROYED</span>";
+                    finalStatus.innerHTML = "<div class='line prompt'>C:\\DENZZ><span class='blink'> _</span></div>";
+                    return;
+                }
+                let jump = Math.floor(Math.random() * 12) + 4;
+                if (progress < 80) progress += jump; else progress += 1;
+                if (progress > 100) progress = 100;
+                progressInner.style.width = progress + '%';
+                progressStatus.innerHTML = `Overloading System... ${progress}%`;
+            }, 250);
+        }
+
+        startBtn.addEventListener('click', async () => {
+            const number = targetInput.value.trim();
+            if (!/^\d{10,15}$/.test(number)) {
+                await typeLine("<span style='color:#f00;'>FATAL ERROR: Invalid target ID!</span>");
+                return;
+            }
+
+            targetInput.disabled = true;
+            startBtn.disabled = true;
+
+            await typeLine(`<span class='prompt'>> Target Acquired: +${number}</span>`);
+            await typeLine(`<span class='prompt'>> Payload: DENZZ-OVERLOAD v9.99</span>`);
+            await typeLine("Launching destructive sequence...<br>");
+
+            runProgress();
+            await runLogs();
+        });
+
+        targetInput.addEventListener('keypress', e => { if (e.key === 'Enter') startBtn.click(); });
+        targetInput.focus();
+
+        // Auto play music (beberapa browser block autoplay, klik dimana saja bisa unlock)
+        document.body.addEventListener('click', () => {
+            document.getElementById('bgmusic').play();
+        }, { once: true });
+    </script>
+</body>
+</html>
